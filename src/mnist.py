@@ -1,7 +1,6 @@
 import torch
 import torch.utils
 from torch import nn
-import numpy as np
 
 class TinyCNN(nn.Module):
     def __init__(self, n_classes) -> None:
@@ -39,33 +38,3 @@ def train_one_epoch(net, optimizer, train_loader):
         avg_loss += loss_net.item()
     
     return avg_loss / len(train_loader)
-
-def test_torch(net, test_loader):
-    """Test the network: measure accuracy on the test set."""
-
-    # Freeze normalization layers
-    net.eval()
-
-    all_y_pred = np.zeros((len(test_loader)), dtype=np.int64)
-    all_targets = np.zeros((len(test_loader)), dtype=np.int64)
-
-    # Iterate over the batches
-    idx = 0
-    for data, target in test_loader:
-        # Accumulate the ground truth labels
-        endidx = idx + target.shape[0]
-        all_targets[idx:endidx] = target.numpy()
-
-        # Run forward and get the predicted class id
-        output = net(data).argmax(1).detach().numpy()
-        all_y_pred[idx:endidx] = output
-
-        idx += target.shape[0]
-
-    # Print out the accuracy as a percentage
-    n_correct = np.sum(all_targets == all_y_pred)
-    print(
-        f"Test accuracy for fp32 weights and activations: "
-        f"{n_correct / len(test_loader) * 100:.2f}%"
-    )
-
